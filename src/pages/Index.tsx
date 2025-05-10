@@ -5,6 +5,7 @@ import AnalysisForm, { AnalysisResult } from '@/components/AnalysisForm';
 import ResultsDisplay from '@/components/ResultsDisplay';
 import AlgorithmInfo from '@/components/AlgorithmInfo';
 import { Separator } from '@/components/ui/separator';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const Index = () => {
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -22,12 +23,15 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-white shadow-sm py-6">
-        <div className="container flex items-center justify-center">
-          <div className="mr-4">
-            <DnaHelix />
+      <header className="bg-card shadow-sm py-6 border-b">
+        <div className="container flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="mr-4">
+              <DnaHelix />
+            </div>
+            <h1 className="text-3xl font-bold text-primary">DNA Sequence Analyzer</h1>
           </div>
-          <h1 className="text-3xl font-bold text-primary">DNA Sequence Analyzer</h1>
+          <ThemeToggle />
         </div>
       </header>
 

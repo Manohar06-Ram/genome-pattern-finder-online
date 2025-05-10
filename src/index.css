@@ -37,25 +37,25 @@
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    --background: 222 47% 11%; /* Dark background #111827 */
+    --foreground: 210 40% 98%; /* Light text #F8FAFC */
 
-    --card: 222 47% 11%;
+    --card: 222 47% 15%; /* Dark cards #1a202c */
     --card-foreground: 210 40% 98%;
 
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 258 58% 75%;
+    --primary: 258 58% 75%; /* Same purple #9b87f5 */
     --primary-foreground: 222 47% 11%;
 
-    --secondary: 217 33% 18%;
+    --secondary: 217 33% 18%; /* Dark secondary #1F2937 */
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217 33% 18%;
-    --muted-foreground: 215 20% 65%;
+    --muted-foreground: 215 20% 65%; /* Muted text #9CA3AF */
 
-    --accent: 217 33% 18%;
+    --accent: 260 30% 54%; /* Secondary purple #7E69AB */
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 63% 31%;
@@ -63,7 +63,7 @@
 
     --border: 217 33% 18%;
     --input: 217 33% 18%;
-    --ring: 213 27% 84%;
+    --ring: 258 58% 75%;
   }
 }
 
@@ -110,3 +110,17 @@
 .strand-4 { transform: rotateY(180deg); left: 45%; }
 .strand-5 { transform: rotateY(240deg); left: 45%; }
 .strand-6 { transform: rotateY(300deg); left: 45%; }
+
+/* Dark mode transitions */
+.dark body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Improve card and input styling for dark/light modes */
+.card, .input, button, select, textarea {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
