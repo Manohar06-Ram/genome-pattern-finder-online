@@ -1,5 +1,6 @@
 
 import { useState, useEffect, createContext, useContext } from 'react';
+import * as THREE from 'three';
 
 type Theme = 'dark' | 'light';
 
@@ -48,13 +49,10 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     
     // Fix the 3D visualization if it exists
     const dna3DContainer = document.getElementById('dna-3d-container');
-    if (dna3DContainer && window.THREE) {
-      const scene = dna3DContainer.__scene;
-      if (scene) {
-        scene.background = theme === 'dark' ? 
-          new window.THREE.Color(0x111827) : 
-          new window.THREE.Color(0xf4f6f9);
-      }
+    if (dna3DContainer && dna3DContainer.__scene) {
+      dna3DContainer.__scene.background = theme === 'dark' ? 
+        new THREE.Color(0x111827) : 
+        new THREE.Color(0xf4f6f9);
     }
   }, [theme]);
 
