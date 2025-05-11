@@ -1,26 +1,222 @@
+
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>genome-pattern-finder-online</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DNA Sequence Analyzer</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <div class="container header-content">
+        <div class="brand">
+          <div id="dna-animation"></div>
+          <h1>DNA Sequence Analyzer</h1>
+        </div>
+        <button id="theme-toggle" aria-label="Toggle theme">
+          <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
 
-    <meta property="og:title" content="genome-pattern-finder-online" />
-    <meta property="og:description" content="Lovable Generated Project" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <main class="container">
+      <div class="grid">
+        <div class="col-span-2">
+          <div class="card">
+            <div class="card-header">
+              <h2>DNA Sequence Analysis</h2>
+            </div>
+            <div class="card-content">
+              <form id="analysis-form">
+                <div class="form-group">
+                  <label for="dna-sequence">DNA Sequence</label>
+                  <textarea id="dna-sequence" placeholder="Enter DNA sequence (A, C, G, T)" rows="5"></textarea>
+                </div>
+                
+                <div class="form-group">
+                  <label for="file-upload">OR Upload DNA Sequence File (.txt or .fasta)</label>
+                  <input id="file-upload" type="file" accept=".txt,.fasta">
+                </div>
+                
+                <div class="form-group">
+                  <label for="pattern">Pattern to Search</label>
+                  <input id="pattern" type="text" placeholder="Enter pattern (A, C, G, T)">
+                </div>
+                
+                <div class="form-group">
+                  <label for="algorithm">Algorithm</label>
+                  <select id="algorithm">
+                    <option value="naive">Naive</option>
+                    <option value="kmp">Knuth-Morris-Pratt (KMP)</option>
+                    <option value="rabin-karp">Rabin-Karp</option>
+                  </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  Analyze Sequence
+                </button>
+              </form>
+            </div>
+          </div>
+          
+          <div id="results-section" class="card hidden">
+            <div class="card-header">
+              <h2>Analysis Results</h2>
+              <span id="algorithm-badge" class="badge"></span>
+            </div>
+            <div class="card-content">
+              <div class="results-meta">
+                <div>
+                  <span class="meta-label">DNA Sequence Length:</span> <span id="dna-length"></span> bp
+                </div>
+                <div>
+                  <span class="meta-label">Pattern Length:</span> <span id="pattern-length"></span> bp
+                </div>
+                <div>
+                  <span class="meta-label">Execution Time:</span> <span id="execution-time"></span> ms
+                </div>
+              </div>
+              
+              <div class="separator"></div>
+              
+              <div id="matches-found" class="hidden">
+                <div class="success-message">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span>Pattern found at <span id="match-count"></span> position(s)</span>
+                </div>
+                
+                <div class="matches-box">
+                  <p class="font-medium">Matches at positions:</p>
+                  <div id="matches-container" class="matches-container"></div>
+                </div>
+              </div>
+              
+              <div id="no-matches" class="hidden alert-error">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+                <span>Pattern not found in the DNA sequence.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-span-1">
+          <div class="card">
+            <div class="card-header">
+              <h2>DNA Sequence Matching Algorithms</h2>
+            </div>
+            <div class="card-content">
+              <div class="accordion">
+                <div class="accordion-item">
+                  <button class="accordion-button">Naive Algorithm</button>
+                  <div class="accordion-content">
+                    <p>
+                      The naive approach checks for a match at each position in the DNA sequence by comparing each character of the pattern.
+                    </p>
+                    <p>
+                      <strong>Time Complexity:</strong> O(n * m), where n is the length of the DNA sequence and m is the length of the pattern.
+                    </p>
+                    <p>
+                      <strong>Best For:</strong> Short patterns and sequences or when the pattern rarely matches.
+                    </p>
+                  </div>
+                </div>
+                
+                <div class="accordion-item">
+                  <button class="accordion-button">Knuth-Morris-Pratt (KMP)</button>
+                  <div class="accordion-content">
+                    <p>
+                      KMP uses information about the pattern itself to avoid redundant comparisons when a mismatch occurs.
+                    </p>
+                    <p>
+                      <strong>Time Complexity:</strong> O(n + m), where n is the length of the DNA sequence and m is the length of the pattern.
+                    </p>
+                    <p>
+                      <strong>Best For:</strong> Long patterns with repeating subpatterns.
+                    </p>
+                  </div>
+                </div>
+                
+                <div class="accordion-item">
+                  <button class="accordion-button">Rabin-Karp Algorithm</button>
+                  <div class="accordion-content">
+                    <p>
+                      Rabin-Karp uses hashing to quickly compare the pattern with substrings of the text, reducing unnecessary character comparisons.
+                    </p>
+                    <p>
+                      <strong>Time Complexity:</strong> Average O(n + m), worst case O(n * m), where n is the length of the DNA sequence and m is the length of the pattern.
+                    </p>
+                    <p>
+                      <strong>Best For:</strong> Searching for multiple patterns simultaneously in a text.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="separator"></div>
+              
+              <div class="info-text">
+                <p>
+                  <strong>DNA Sequence Validity:</strong> Only sequences containing A, C, G, T characters are considered valid.
+                </p>
+                <p>
+                  <strong>File Formats:</strong> Upload DNA sequences in .txt (raw sequence) or .fasta format (with header lines starting with &gt;).
+                </p>
+              </div>
+            </div>
+          </div>
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-  </head>
+          <div class="card mt-4">
+            <div class="card-header">
+              <h2>3D DNA Visualization</h2>
+            </div>
+            <div class="card-content">
+              <div id="dna-3d-container"></div>
+              <div class="info-text">
+                <p><small>Drag to rotate. Scroll to zoom.</small></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
 
-  <body>
-    <div id="root"></div>
-    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <footer>
+      <div class="container">
+        <p>DNA Sequence Analyzer &copy; 2025</p>
+        <p class="footer-subtitle">A web application for analyzing DNA sequences using string matching algorithms</p>
+      </div>
+    </footer>
+
+    <!-- Toast container for notifications -->
+    <div id="toast-container"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
 </html>
