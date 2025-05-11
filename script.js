@@ -1,9 +1,9 @@
-
 document.addEventListener('DOMContentLoaded', () => {
   // DOM Elements
   const themeToggle = document.getElementById('theme-toggle');
   const analysisForm = document.getElementById('analysis-form');
   const fileUpload = document.getElementById('file-upload');
+  const fileUploadLabel = document.getElementById('file-upload-label');
   const dnaSequenceInput = document.getElementById('dna-sequence');
   const patternInput = document.getElementById('pattern');
   const algorithmSelect = document.getElementById('algorithm');
@@ -19,11 +19,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const dnaAnimationEl = document.getElementById('dna-animation');
   const dna3DContainer = document.getElementById('dna-3d-container');
   
+  // Update file input display
+  fileUpload.addEventListener('change', function() {
+    const fileName = this.files[0]?.name || "No file selected";
+    const fileNameDisplay = fileUploadLabel.querySelector('span');
+    if (fileNameDisplay) {
+      fileNameDisplay.textContent = fileName;
+    }
+  });
+  
   // Initialize DNA Animation
   initDnaAnimation();
   
-  // Initialize 3D DNA visualization
-  initDna3D();
+  // Initialize 3D DNA visualization - ensure Three.js is loaded
+  if (window.THREE) {
+    initDna3D();
+  } else {
+    console.error("Three.js library not loaded properly.");
+    // Add a fallback message
+    dna3DContainer.innerHTML = '<div class="p-4 text-center">3D visualization could not be loaded. Please check if Three.js is properly loaded.</div>';
+  }
   
   // Theme Toggle Functionality
   initTheme();
@@ -41,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize DNA Animation
   function initDnaAnimation() {
     // Create 6 strands for the helix
+    dnaAnimationEl.innerHTML = ''; // Clear any existing strands
     for (let i = 1; i <= 6; i++) {
       const strand = document.createElement('div');
       strand.className = 'dna-strand';
@@ -54,16 +70,26 @@ document.addEventListener('DOMContentLoaded', () => {
   function initTheme() {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.body.classList.add('dark');
       document.documentElement.classList.add('dark');
     } else {
+      document.body.classList.remove('dark');
       document.documentElement.classList.remove('dark');
     }
   }
 
   // Toggle Theme
   function toggleTheme() {
-    const isDark = document.documentElement.classList.toggle('dark');
+    const isDark = document.body.classList.toggle('dark');
+    document.documentElement.classList.toggle('dark', isDark);
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    
+    // If 3D visualization is loaded, update its background
+    if (window.THREE && dna3DContainer.__scene) {
+      dna3DContainer.__scene.background = isDark 
+        ? new THREE.Color(0x111827) 
+        : new THREE.Color(0xf4f6f9);
+    }
   }
 
   // Initialize Accordion
@@ -454,15 +480,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3D DNA Visualization using Three.js
   function initDna3D() {
     const container = document.getElementById('dna-3d-container');
+    if (!container) {
+      console.error("Container for 3D visualization not found.");
+      return;
+    }
+    
     const width = container.clientWidth;
     const height = container.clientHeight;
     
     // Set up scene, camera, and renderer
     const scene = new THREE.Scene();
+    // Store reference to scene for theme updates
+    container.__scene = scene;
+    
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     
     renderer.setSize(width, height);
+    container.innerHTML = ''; // Clear any existing content
     container.appendChild(renderer.domElement);
     
     // Add lighting
@@ -473,61 +508,34 @@ document.addEventListener('DOMContentLoaded', () => {
     directionalLight.position.set(1, 1, 1);
     scene.add(directionalLight);
     
-    // Get theme colors
-    const isPrimaryColor = getComputedStyle(document.documentElement)
-      .getPropertyValue('--primary')
-      .trim();
+    // Get theme colors - safely parse HSL values
+    function parseHslColor(hslString) {
+      const match = hslString.match(/(\d+)\s+(\d+)%\s+(\d+)%/);
+      return match ? { h: parseInt(match[1]), s: parseInt(match[2]), l: parseInt(match[3]) } : null;
+    }
     
-    const isAccentColor = getComputedStyle(document.documentElement)
+    const primaryHsl = parseHslColor(getComputedStyle(document.documentElement)
+      .getPropertyValue('--primary')
+      .trim()) || { h: 258, s: 58, l: 75 }; // Default purple
+    
+    const accentHsl = parseHslColor(getComputedStyle(document.documentElement)
       .getPropertyValue('--accent')
-      .trim();
+      .trim()) || { h: 199, s: 91, l: 49 }; // Default blue
     
     // Function to convert HSL values to hex color
     function hslToHex(h, s, l) {
-      h /= 360;
-      s /= 100;
       l /= 100;
-      
-      let r, g, b;
-      
-      if (s === 0) {
-        r = g = b = l; // achromatic
-      } else {
-        const hue2rgb = (p, q, t) => {
-          if (t < 0) t += 1;
-          if (t > 1) t -= 1;
-          if (t < 1/6) return p + (q - p) * 6 * t;
-          if (t < 1/2) return q;
-          if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-          return p;
-        };
-        
-        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        const p = 2 * l - q;
-        
-        r = hue2rgb(p, q, h + 1/3);
-        g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1/3);
-      }
-      
-      const toHex = x => {
-        const hex = Math.round(x * 255).toString(16);
-        return hex.length === 1 ? '0' + hex : hex;
+      const a = s * Math.min(l, 1 - l) / 100;
+      const f = n => {
+        const k = (n + h / 30) % 12;
+        const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * color).toString(16).padStart(2, '0');
       };
-      
-      return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+      return `#${f(0)}${f(8)}${f(4)}`;
     }
     
-    // Parse HSL values and convert to hex color
-    const primaryHslMatch = isPrimaryColor.match(/(\d+)\s+(\d+)%\s+(\d+)%/);
-    const primaryColor = primaryHslMatch 
-      ? hslToHex(parseInt(primaryHslMatch[1]), parseInt(primaryHslMatch[2]), parseInt(primaryHslMatch[3]))
-      : '#9b87f5';
-      
-    const accentHslMatch = isAccentColor.match(/(\d+)\s+(\d+)%\s+(\d+)%/);
-    const accentColor = accentHslMatch 
-      ? hslToHex(parseInt(accentHslMatch[1]), parseInt(accentHslMatch[2]), parseInt(accentHslMatch[3]))
-      : '#1EAEDB';
+    const primaryColor = hslToHex(primaryHsl.h, primaryHsl.s, primaryHsl.l);
+    const accentColor = hslToHex(accentHsl.h, accentHsl.s, accentHsl.l);
     
     // Create DNA helix
     const createDNAHelix = () => {
@@ -660,21 +668,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     animate();
     
-    // Handle theme changes
-    const themeObserver = new MutationObserver(() => {
-      // Update colors based on new theme
-      scene.background = document.documentElement.classList.contains('dark') 
-        ? new THREE.Color(0x111827) 
-        : new THREE.Color(0xf4f6f9);
-    });
-    
-    themeObserver.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-    
     // Set initial background color based on theme
-    scene.background = document.documentElement.classList.contains('dark') 
+    scene.background = document.body.classList.contains('dark') 
       ? new THREE.Color(0x111827) 
       : new THREE.Color(0xf4f6f9);
   }
