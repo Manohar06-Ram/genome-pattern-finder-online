@@ -6,12 +6,17 @@ import { useTheme } from '@/hooks/useTheme';
 
 const ThemeToggle = () => {
   const { theme, setTheme } = useTheme();
+  
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+  };
 
   return (
     <Button
       variant="ghost"
       size="icon"
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      onClick={toggleTheme}
       aria-label="Toggle theme"
       className="rounded-full"
     >

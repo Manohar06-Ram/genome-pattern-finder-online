@@ -13,14 +13,14 @@ const AlgorithmInfo = () => {
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="naive">
             <AccordionTrigger>Naive Algorithm</AccordionTrigger>
-            <AccordionContent className="text-sm">
-              <p className="mb-2">
+            <AccordionContent>
+              <p className="mb-2 text-sm">
                 The naive approach checks for a match at each position in the DNA sequence by comparing each character of the pattern.
               </p>
-              <p className="mb-2">
+              <p className="mb-2 text-sm">
                 <strong>Time Complexity:</strong> O(n * m), where n is the length of the DNA sequence and m is the length of the pattern.
               </p>
-              <p>
+              <p className="text-sm">
                 <strong>Best For:</strong> Short patterns and sequences or when the pattern rarely matches.
               </p>
             </AccordionContent>
@@ -28,14 +28,14 @@ const AlgorithmInfo = () => {
           
           <AccordionItem value="kmp">
             <AccordionTrigger>Knuth-Morris-Pratt (KMP)</AccordionTrigger>
-            <AccordionContent className="text-sm">
-              <p className="mb-2">
+            <AccordionContent>
+              <p className="mb-2 text-sm">
                 KMP uses information about the pattern itself to avoid redundant comparisons when a mismatch occurs.
               </p>
-              <p className="mb-2">
+              <p className="mb-2 text-sm">
                 <strong>Time Complexity:</strong> O(n + m), where n is the length of the DNA sequence and m is the length of the pattern.
               </p>
-              <p>
+              <p className="text-sm">
                 <strong>Best For:</strong> Long patterns with repeating subpatterns.
               </p>
             </AccordionContent>
@@ -43,14 +43,14 @@ const AlgorithmInfo = () => {
           
           <AccordionItem value="rabin-karp">
             <AccordionTrigger>Rabin-Karp Algorithm</AccordionTrigger>
-            <AccordionContent className="text-sm">
-              <p className="mb-2">
+            <AccordionContent>
+              <p className="mb-2 text-sm">
                 Rabin-Karp uses hashing to quickly compare the pattern with substrings of the text, reducing unnecessary character comparisons.
               </p>
-              <p className="mb-2">
+              <p className="mb-2 text-sm">
                 <strong>Time Complexity:</strong> Average O(n + m), worst case O(n * m), where n is the length of the DNA sequence and m is the length of the pattern.
               </p>
-              <p>
+              <p className="text-sm">
                 <strong>Best For:</strong> Searching for multiple patterns simultaneously in a text.
               </p>
             </AccordionContent>

@@ -75,26 +75,29 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Segoe UI', 'Arial', sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
-/* DNA Animation */
-.dna-helix {
-  width: 30px;
+/* Dark mode transitions */
+.dark body, body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Improve card and input styling for dark/light modes */
+.card, .input, button, select, textarea {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* 3D DNA Visualization container */
+.dna-helix-container {
   height: 60px;
+  width: 100%;
+  min-width: 30px;
   position: relative;
-  animation: rotate 3s linear infinite;
 }
 
-@keyframes rotate {
-  0% {
-    transform: rotateY(0deg);
-  }
-  100% {
-    transform: rotateY(360deg);
-  }
-}
-
+/* CSS for old-style DNA animation as fallback */
 .dna-strand {
   position: absolute;
   top: 0;
@@ -111,16 +114,7 @@
 .strand-5 { transform: rotateY(240deg); left: 45%; }
 .strand-6 { transform: rotateY(300deg); left: 45%; }
 
-/* Dark mode transitions */
-.dark body {
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-body {
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-/* Improve card and input styling for dark/light modes */
-.card, .input, button, select, textarea {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+@keyframes rotate {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(360deg); }
 }
